@@ -17,7 +17,7 @@ fi
 if [ "$PLATFORM" = "Darwin" ]; then
 xhost + 127.0.0.1
 docker run -it --rm \
-    --name coreemu8 \
+    --name coreemu9 \
     -p 2000:22 \
     -p 50051:50051 \
     -v $SHARED:/shared \
@@ -30,7 +30,7 @@ docker run -it --rm \
 else
 xhost +local:root
 docker run -it --rm \
-    --name coreemu8 \
+    --name coreemu9 \
     -p 2000:22 \
     -v $SHARED:/shared \
     -p 50052:50051 \
