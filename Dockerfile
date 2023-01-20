@@ -13,10 +13,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # install basic dependencies
 RUN apt-get update && \
-  apt-get install -y git sudo wget tzdata python3 python3-pip python3-venv 
-#&& \
-#apt-get clean && \
-#rm -rf /var/lib/apt/lists/*
+  apt-get install -y git sudo wget tzdata python3 python3-pip python3-venv && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
 
 # install core
 WORKDIR /opt
@@ -25,7 +24,9 @@ WORKDIR /opt/core
 RUN git checkout ${BRANCH}
 #RUN NO_SYSTEM=1 ./setup.sh
 RUN ./setup.sh
-RUN . /root/.bashrc && inv install -v -p ${PREFIX}
+RUN apt-get update && . /root/.bashrc && inv install -v -p ${PREFIX} && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
 ENV PATH "$PATH:/opt/core/venv/bin"
 
 # install emane
@@ -35,23 +36,6 @@ RUN apt-get update && apt-get install -y libpcap-dev libpcre3-dev libxml2-dev uu
   rm -rf /var/lib/apt/lists/*
 
 WORKDIR /root
-#ENV PB_REL="https://github.com/protocolbuffers/protobuf/releases"
-#RUN wget $PB_REL/download/v21.12/protoc-21.12-linux-aarch_64.zip && \
-#  unzip protoc-21.12-linux-aarch_64.zip -d /usr/local
-#RUN wget $PB_REL/download/v21.12/protobuf-all-21.12.tar.gz && \
-#  tar xf protobuf-all-21.12.tar.gz && \
-#  cd protobuf-21.12 && \
-#  ./autogen.sh && ./configure && make -j$(nproc) && make install && ldconfig
-
-#WORKDIR /opt
-#RUN git clone https://github.com/adjacentlink/emane.git
-#RUN cd emane && \
-#  ./autogen.sh && \
-#  ./configure --prefix=/usr && \
-#  make -j$(nproc)  && \
-#  make install
-#RUN /opt/core/venv/bin/python -m pip install emane/src/python
-#RUN wget https://raw.githubusercontent.com/protocolbuffers/protobuf/main/python/google/protobuf/internal/builder.py -O /opt/core/venv/lib/python3.10/site-packages/google/protobuf/internal/builder.py
 
 # install emane
 RUN apt-get update && apt-get install -y libpcap-dev libpcre3-dev libprotobuf-dev libxml2-dev protobuf-compiler unzip uuid-dev && \
@@ -64,9 +48,9 @@ RUN cd emane && \
   ./configure --prefix=/usr && \
   make -j$(nproc)  && \
   make install
-RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.6/protoc-3.19.6-linux-x86_64.zip && \
+RUN ARCH1=$(uname -m | sed -e s/arm64/aarch_64/ | sed -e s/aarch64/aarch_64/) && wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.6/protoc-3.19.6-linux-$ARCH1.zip && \
   mkdir protoc && \
-  unzip protoc-3.19.6-linux-x86_64.zip -d protoc
+  unzip protoc-3.19.6-linux-$ARCH1.zip -d protoc
 RUN PATH=/opt/protoc/bin:$PATH && \
   cd emane/src/python && \
   make clean && \
